@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DeBank TestNet toss</title>
+ 
+    <style>
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 20px auto;
+        width: fit-content;
+      }
+      th,
+      td {
+        border: solid;
+        padding: 20px;
+      }
+ 
+      table {
+        border-collapse: collapse;
+      }
+    </style>
+ 
+  </head>
+  <body onload="checkChain()">
+    <h1>DeBank TestNet toss</h1>
+ 
+    <div>
+     <button id="chain" onclick="changeChain()" hidden> Switch to DeBankTestNet</button> 
+     <button id="mint" onclick="play()" hidden> Toss ! (0.001 DeBank USD)!</button> 
+     <div id="event"></div>
+  </div>
+ 
+    <!-- https://github.com/ethers-io/ethers.js/#installing -->
+    <script
+      src="https://cdn.ethers.io/lib/ethers-5.6.umd.min.js"
+      type="text/javascript"
+    ></script>
+ 
+  <script type="text/javascript">
+      contractAddress = '0xbDEc4c02fAf02Ceaeda25427FfD75aAA34A2c99E',
+      abi = [
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "r",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "message",
+						"type": "string"
+					}
+				],
+				"name": "Result",
+				"type": "event"
+			},
+			{
+				"inputs": [],
+				"name": "play",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "withdraw",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"stateMutability": "payable",
+				"type": "receive"
+			}
+		] 
+
+      async function checkChain() {
+	const targetNetworkId = '0x1ed816';
+	const currentChainId = await window.ethereum.request({
+	      method: 'eth_chainId',
+	    });
+	if (currentChainId != targetNetworkId) {
+	  document.getElementById("chain").hidden = false;
+	} else {
+	  document.getElementById("chain").hidden = true;
+	  document.getElementById("mint").hidden = false;
+	}
+      }
+
+      async function changeChain() {
+	const targetNetworkId = '0x1ed816';
+	await window.ethereum.request({
+	  method: 'wallet_switchEthereumChain',
+	  params: [{ chainId: targetNetworkId }],
+	});
+	this.checkChain();
+      }
+
+      async function play() {
+	 const provider = ((window.ethereum != null) ? new ethers.providers.Web3Provider(window.ethereum) : ethers.providers.getDefaultProvider());
+        // const provider = new ethers.providers.Web3Provider(window.ethereum)
+        await provider.send('eth_requestAccounts', []);
+        const signer = provider.getSigner();
+	const contract = new ethers.Contract(contractAddress, abi, signer);
+	const options = {value: ethers.utils.parseEther("0.001"), gasLimit: 33000};
+        const res = await contract.play(options);
+	document.getElementById("event").replaceChildren("Waiting for tx...");
+        res.wait();
+      }
+
+      async function getResult() {
+	const provider = ((window.ethereum != null) ? new ethers.providers.Web3Provider(window.ethereum) : ethers.providers.getDefaultProvider());
+        // const provider = new ethers.providers.Web3Provider(window.ethereum)
+        await provider.send('eth_requestAccounts', []);
+        const signer = provider.getSigner();
+	const contract = new ethers.Contract(contractAddress, abi, signer);
+	contract.on("Result", (r, message)=>{
+	  console.log(message);
+	  document.getElementById("event").replaceChildren(message);
+	});
+    }
+
+    getResult();
+    </script>
+  </body>
+</html>
