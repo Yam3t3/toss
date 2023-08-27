@@ -119,6 +119,7 @@
 	const provider = ((window.ethereum != null) ? new ethers.providers.Web3Provider(window.ethereum) : ethers.providers.getDefaultProvider());
         // const provider = new ethers.providers.Web3Provider(window.ethereum)
         await provider.send('eth_requestAccounts', []);
+	provider.pollingInterval = 1000;
         const signer = provider.getSigner();
 	const contract = new ethers.Contract(contractAddress, abi, signer);
 	contract.on("Result", (r, message)=>{
