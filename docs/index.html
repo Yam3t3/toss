@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -6,22 +5,21 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DeBank TestNet toss</title>
-	    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
-		<style>
-			body { background-color: #eff3f8; color: #19233c; }
-			.toss-body { background-color: #ffffff; }
-			.btn { background-color: #fe815f; color: #ffffff; }
-			.btn:hover { background-color: #ff825eb3;}
-			body.theme-dark { background-color: #252a37; }
-			body.theme-dark .toss-body { background-color: #2e3343; color: #eff3f8; }
-			.btn.theme-dark { background-color: #fe815f; color: #ffffff; }
-		</style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <style>
+        body { background-color: #eff3f8; color: #19233c; }
+        .toss-body { background-color: #ffffff; }
+        .btn { background-color: #fe815f; color: #ffffff; }
+        .btn:hover { background-color: #ff825eb3;}
+        body.theme-dark { background-color: #252a37; }
+        body.theme-dark .toss-body { background-color: #2e3343; color: #eff3f8; }
+        .btn.theme-dark { background-color: #fe815f; color: #ffffff; }
+    </style>
   </head>
   <body onload="checkChain()">
-
-	<div class="container my-5">
-		<div class="position-relative p-5 text-center toss-body rounded-2 shadow-sm">
-			<div class="position-absolute top-0 end-0 p-3 m-3 mode-toggle">
+    <div class="container my-5">
+        <div class="position-relative p-5 text-center toss-body rounded-2 shadow-sm">
+            <div class="position-absolute top-0 end-0 p-3 m-3 mode-toggle">
 				<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-md" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
 					<path stroke="none" d="M0 0h24v24H0z"></path>
 					<circle cx="12" cy="12" r="9"></circle>
@@ -40,12 +38,12 @@
 			<p class="mb-5"> 
 				Good luck !
 			</p>
-			<button id="chain" onclick="changeChain()" hidden class="btn btn-lg px-4" type="button">
-			Switch to DeBankTestNet
-			</button>
-			<button id="mint" onclick="play()" hidden class="btn btn-lg px-4" type="button">
-			Toss ! (0.001 DeBank USD)!
-			</button>
+			<button id="chain" onclick="changeChain()" hidden class="btn btn-lg px-4" type="button">Switch to DeBankTestNet</button>
+            
+            <button id="mint" onclick="play()" hidden class="btn btn-lg px-4" type="button">
+                <span id="loading-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" hidden></span>
+                Toss ! (0.001 DeBank USD)!
+            </button>
 
 			<div class="col-md-6 offset-md-3 mt-3 text-center">
 				<div id="event" class="alter alter-info alert-dismissible fade show"></div>
@@ -126,21 +124,33 @@
       }
 
       async function play() {
-	 const provider = ((window.ethereum != null) ? new ethers.providers.Web3Provider(window.ethereum) : ethers.providers.getDefaultProvider());
-        // const provider = new ethers.providers.Web3Provider(window.ethereum)
-        await provider.send('eth_requestAccounts', []);
-        const signer = provider.getSigner();
-	const contract = new ethers.Contract(contractAddress, abi, signer);
-	const options = {value: ethers.utils.parseEther("0.001"), gasLimit: 33000};
-        const res = await contract.play(options);
-	const a = document.createElement('a');
-	a.title = "Waiting for tx";
-	a.href = `https://explorer.testnet.debank.com/tx/${res.hash}`
-	a.replaceChildren("Waiting for transaction to confirm... ⧉");
-	document.getElementById("event").classList = "alert alert-info alert-dismissible fade show";
-	document.getElementById("event").replaceChildren(a);
-        // res.wait();
-      }
+            const button = document.getElementById("mint");
+            const spinner = document.getElementById("loading-spinner");
+            
+            button.disabled = true;
+            spinner.hidden = false;
+
+            const provider = ((window.ethereum != null) ? new ethers.providers.Web3Provider(window.ethereum) : ethers.providers.getDefaultProvider());
+            await provider.send('eth_requestAccounts', []);
+            const signer = provider.getSigner();
+            const contract = new ethers.Contract(contractAddress, abi, signer);
+            
+            // Estimate gas
+            const gasEstimate = await contract.estimateGas.play();
+            const options = { value: ethers.utils.parseEther("0.001"), gasLimit: gasEstimate };
+            
+            const res = await contract.play(options);
+
+            button.disabled = false;
+            spinner.hidden = true;
+
+            const a = document.createElement('a');
+            a.title = "Waiting for tx";
+            a.href = `https://explorer.testnet.debank.com/tx/${res.hash}`;
+            a.replaceChildren("Waiting for transaction to confirm... ⧉");
+            document.getElementById("event").classList = "alert alert-info alert-dismissible fade show";
+            document.getElementById("event").replaceChildren(a);
+        }
 
       async function getResult() {
 	const provider = ((window.ethereum != null) ? new ethers.providers.Web3Provider(window.ethereum) : ethers.providers.getDefaultProvider());
