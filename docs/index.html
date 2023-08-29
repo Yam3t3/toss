@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -5,36 +6,58 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DeBank TestNet toss</title>
- 
+	    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+		<style>
+			body { background-color: #eff3f8; color: #19233c; }
+			.toss-body { background-color: #ffffff; }
+			.btn { background-color: #fe815f; color: #ffffff; }
+			.btn:hover { background-color: #ff825eb3;}
+			body.theme-dark { background-color: #252a37; }
+			body.theme-dark .toss-body { background-color: #2e3343; color: #eff3f8; }
+			.btn.theme-dark { background-color: #fe815f; color: #ffffff; }
+		</style>
   </head>
   <body onload="checkChain()">
-    <div class="container">
-      <div class="row">
-	<div class="col-md-6 offset-md-3 text-center">
-	  <h1>DeBank TestNet toss</h1>
-	</div>
-      </div>
 
-      <div class="row">
-	<div class="col-md-6 offset-md-3 text-center">
-	  <button id="chain" onclick="changeChain()" hidden> Switch to DeBankTestNet</button> 
-	  <button id="mint" onclick="play()" hidden> Toss ! (0.001 DeBank USD)!</button> 
+	<div class="container my-5">
+		<div class="position-relative p-5 text-center toss-body rounded-2 shadow-sm">
+			<div class="position-absolute top-0 end-0 p-3 m-3 mode-toggle">
+				<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-md" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+					<path stroke="none" d="M0 0h24v24H0z"></path>
+					<circle cx="12" cy="12" r="9"></circle>
+					<line x1="12" y1="3" x2="12" y2="21"></line>
+					<path d="M12 9l4.65 -4.65"></path>
+					<path d="M12 14.3l7.37 -7.37"></path>
+					<path d="M12 19.6l8.85 -8.85"></path>
+				</svg>
+			</div>
+			<img class="rounded-2 mb-4" src="https://raw.githubusercontent.com/DeBankDeFi/logo/master/DeBank/debank-icon.svg"  width="100" height="100">
+			<h1>TOSS</h1>
+			<p class="col-lg-76 mx-auto">
+				Not sure what to do with your DeBank Testnet token? Play DeBank Toss! <br />
+				The rules are simple: bet 0.001 USD, and you have a 50/50 chance to win 0.00145 USD.
+			</p>
+			<p class="mb-5"> 
+				Good luck !
+			</p>
+			<button id="chain" onclick="changeChain()" hidden class="btn btn-lg px-4" type="button">
+			Switch to DeBankTestNet
+			</button>
+			<button id="mint" onclick="play()" hidden class="btn btn-lg px-4" type="button">
+			Toss ! (0.001 DeBank USD)!
+			</button>
+
+			<div class="col-md-6 offset-md-3 mt-3 text-center">
+				<div id="event" class="alter alter-info alert-dismissible fade show"></div>
+			</div>
+		</div>
 	</div>
-      </div>
-      <div class="row">
-	<div class="col-md-6 offset-md-3 text-center">
-	  <div id="event" class="alter alter-info alert-dismissible fade show"></div>
-	</div>
-      </div>
-    </div>
 
     <!-- https://github.com/ethers-io/ethers.js/#installing -->
     <script
       src="https://cdn.ethers.io/lib/ethers-5.6.umd.min.js"
       type="text/javascript"
     ></script>
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
  
@@ -135,5 +158,31 @@
 
     getResult();
     </script>
+
+	<script>
+		// Select the button
+		const btn = document.querySelector(".mode-toggle");
+		// Select the theme preference from localStorage
+		const currentTheme = localStorage.getItem("theme");
+		// If the current theme in localStorage is "dark"...
+		if (currentTheme == "dark") {
+			// ...then use the .dark-theme class
+			document.body.classList.add("theme-dark");
+		}
+		// Listen for a click on the button 
+		btn.addEventListener("click", function () {
+			// Toggle the .dark-theme class on each click
+			document.body.classList.toggle("theme-dark");
+			// Let's say the theme is equal to light
+			let theme = "light";
+			// If the body contains the .dark-theme class...
+			if (document.body.classList.contains("theme-dark")) {
+				// ...then let's make the theme dark
+				theme = "dark";
+			}
+			// Then save the choice in localStorage
+			localStorage.setItem("theme", theme);
+		});
+	</script>
   </body>
 </html>
