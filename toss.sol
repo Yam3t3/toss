@@ -3,22 +3,21 @@
 pragma solidity >=0.8.2 <0.9.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "DAT.sol";
 
 contract Toss is Ownable {
     event Result(uint256 r, string message);
     event TokenTransferred(IERC20 token, address to, uint256 amount);
 
-    IERC20 public DATtoken;
-    uint256 value;
-    uint256 win_value;
-    uint256 token_value;
-    mapping(address => uint256) balances;
+    IERC20 private DATtoken;
+    address private DATAddress;
+    uint256 private value;
+    uint256 private win_value;
+    uint256 private token_value;
+    mapping(address => uint256) private balances;
 
     receive() external payable {}
 
     constructor() {
-        DATtoken = new DAT();
         value = 0.001 ether;
         win_value = 0.00145 ether;
         token_value = 1 ether;
@@ -44,15 +43,15 @@ contract Toss is Ownable {
    }
 
    function withdrawDAT() public {
-        require(DATtoken.balanceOf(msg.sender) <= DATtoken.balanceOf(address(this)), "Insufficient token balance");
+        require(balances[msg.sender] <= DATtoken.balanceOf(address(this)), "Insufficient token balance");
+        uint amount = balances[msg.sender];
         balances[msg.sender] = 0;
-        DATtoken.transfer(msg.sender, balances[msg.sender]);
-        emit TokenTransferred(DATtoken, msg.sender, balances[msg.sender]);   
+        DATtoken.transfer(msg.sender, amount);
+        emit TokenTransferred(DATtoken, msg.sender, amount);   
     }
 
-    function withdraw() external {
-    uint balance = address(this).balance;
-    payable(0x5bB73e04b810527B14b87c37EFf3d62481f2D416).transfer(balance);
+    function withdraw() external onlyOwner {
+        payable(owner()).transfer(address(this).balance);
     }
 
     function getValue() public view returns (uint) { 
@@ -74,5 +73,13 @@ contract Toss is Ownable {
     } 
     function setTokenValue(uint new_token_value) public onlyOwner { 
         token_value = new_token_value; 
+    } 
+
+    function getDATaddress() public view returns (address)  { 
+        return DATAddress; 
+    } 
+    function setDATaddress(address new_DAT_address) public onlyOwner { 
+        DATAddress = new_DAT_address;
+        DATtoken = IERC20(new_DAT_address);
     } 
 }
