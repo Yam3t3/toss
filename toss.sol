@@ -9,19 +9,12 @@ contract Toss is Ownable {
     event TokenTransferred(IERC20 token, address to, uint256 amount);
 
     IERC20 private DATtoken;
-    address private DATAddress;
     uint256 private value;
     uint256 private win_value;
     uint256 private token_value;
     mapping(address => uint256) private balances;
 
     receive() external payable {}
-
-    constructor() {
-        value = 0.001 ether;
-        win_value = 0.00145 ether;
-        token_value = 1 ether;
-    }
 
     function play() public payable {
         require(msg.value == value, "Wrong value");
@@ -75,11 +68,7 @@ contract Toss is Ownable {
         token_value = new_token_value; 
     } 
 
-    function getDATaddress() public view returns (address)  { 
-        return DATAddress; 
-    } 
     function setDATaddress(address new_DAT_address) public onlyOwner { 
-        DATAddress = new_DAT_address;
         DATtoken = IERC20(new_DAT_address);
     } 
 }
