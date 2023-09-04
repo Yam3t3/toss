@@ -314,9 +314,12 @@ async function getValues() {
   const playValue = await contract.getValue();
   const winValue = await contract.getWinValue();
   const tokenValue = await contract.getTokenValue();
-  document.getElementById('play-value').replaceChildren(playValue/(10**18))
-  document.getElementById('win-value').replaceChildren(winValue/(10**18))
-  document.getElementById('dat-value').replaceChildren(tokenValue/(10**18))
+  var plv = document.getElementsByClassName('play-value');
+  Array.from(plv).forEach(element => {
+    element.replaceChildren(playValue/(10**18));
+  });
+  document.getElementById('win-value').replaceChildren(winValue/(10**18));
+  document.getElementById('dat-value').replaceChildren(tokenValue/(10**18));
 }
 
 
